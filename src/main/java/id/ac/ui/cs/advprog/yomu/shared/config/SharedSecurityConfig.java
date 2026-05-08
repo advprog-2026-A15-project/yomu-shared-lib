@@ -13,12 +13,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@ConditionalOnProperty(name = "yomu.security.shared.enabled", havingValue = "true")
-public class SecurityConfig {
+@ConditionalOnProperty(name = "yomu.security.bypass", havingValue = "false", matchIfMissing = true)
+public class SharedSecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SharedSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 

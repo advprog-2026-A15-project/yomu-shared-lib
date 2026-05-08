@@ -21,8 +21,8 @@ public class MessagingConfig {
     }
 
     @Bean
-    public TopicExchange yomuEventsExchange() {
-        return new TopicExchange(EVENTS_EXCHANGE, true, false);
+    public org.springframework.amqp.core.TopicExchange eventExchange() {
+        return new org.springframework.amqp.core.TopicExchange("yomu.events");
     }
 
     @Bean
@@ -30,6 +30,7 @@ public class MessagingConfig {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setExchange(EVENTS_EXCHANGE);
         template.setMessageConverter(messageConverter());
+        template.setExchange("yomu.events");
         return template;
     }
 }
