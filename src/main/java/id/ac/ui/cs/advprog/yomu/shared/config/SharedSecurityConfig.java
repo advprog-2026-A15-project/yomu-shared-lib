@@ -1,6 +1,6 @@
 package id.ac.ui.cs.advprog.yomu.shared.config;
 
-import id.ac.ui.cs.advprog.yomu.shared.security.JwtAuthenticationFilter;
+import id.ac.ui.cs.advprog.yomu.shared.security.servlet.JwtAuthenticationFilter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

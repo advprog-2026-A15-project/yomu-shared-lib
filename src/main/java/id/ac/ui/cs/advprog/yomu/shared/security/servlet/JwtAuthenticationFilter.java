@@ -1,5 +1,6 @@
-package id.ac.ui.cs.advprog.yomu.shared.security;
+package id.ac.ui.cs.advprog.yomu.shared.security.servlet;
 
+import id.ac.ui.cs.advprog.yomu.shared.security.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
