@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -19,6 +21,9 @@ public class JwtService {
 
     @Value("${yomu.jwt.expiration:86400000}") 
     private long jwtExpiration;
+
+    @Value("${yomu.jwt.refresh-expiration:604800000}")
+    private long refreshExpiration;
 
     public boolean isTokenValid(String token) {
         try {
@@ -40,17 +45,51 @@ public class JwtService {
         return extractClaim(token, claims -> claims.get("id", String.class));
     }
 
+    public String extractTokenType(String token) {
+        return extractClaim(token, claims -> claims.get("type", String.class));
+    }
+
+    public Instant extractExpirationInstant(String token) {
+        return extractExpiration(token).toInstant();
+    }
+
+    public boolean isAccessTokenValid(String token) {
+        return isTokenValid(token) && "access".equals(extractTokenType(token));
+    }
+
+    public boolean isRefreshTokenValid(String token) {
+        return isTokenValid(token) && "refresh".equals(extractTokenType(token));
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
     public String generateToken(String username, Map<String, Object> extraClaims) {
+        Map<String, Object> claims = new HashMap<>(extraClaims);
+        claims.putIfAbsent("type", "access");
+        return generateToken(username, claims, jwtExpiration);
+    }
+
+    public String generateAccessToken(String username, Map<String, Object> extraClaims) {
+        Map<String, Object> claims = new HashMap<>(extraClaims);
+        claims.put("type", "access");
+        return generateToken(username, claims, jwtExpiration);
+    }
+
+    public String generateRefreshToken(String username, Map<String, Object> extraClaims) {
+        Map<String, Object> claims = new HashMap<>(extraClaims);
+        claims.put("type", "refresh");
+        return generateToken(username, claims, refreshExpiration);
+    }
+
+    private String generateToken(String username, Map<String, Object> extraClaims, long expirationMillis) {
         return Jwts.builder()
                 .claims(extraClaims)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .expiration(new Date(System.currentTimeMillis() + expirationMillis))
                 .signWith(getSignInKey(), Jwts.SIG.HS256)
                 .compact();
     }
