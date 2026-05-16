@@ -25,6 +25,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
+        // 1. Check for headers from API Gateway first
+        String headerUserId = request.getHeader("X-User-Id");
+        String headerUsername = request.getHeader("X-User-Username");
+        String headerRole = request.getHeader("X-User-Role");
+
+        if (headerUserId != null && headerUsername != null && headerRole != null) {
+            setAuthentication(headerUserId, headerUsername, headerRole, request);
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // 2. Fallback to JWT token if headers not present (e.g. direct service call)
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -39,14 +51,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String role = jwtService.extractRole(jwt); 
                 String userId = jwtService.extractUserId(jwt);
 
-                if (username != null && role != null) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            username, 
-                            userId,  
-                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
-                    );
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                if (username != null && role != null && userId != null) {
+                    setAuthentication(userId, username, role, request);
                 }
             }
         } catch (Exception e) {
@@ -54,5 +60,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void setAuthentication(String userId, String username, String role, HttpServletRequest request) {
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                userId, // principal is userId (UUID string)
+                username, // credentials is username
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
+        );
+        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 }
