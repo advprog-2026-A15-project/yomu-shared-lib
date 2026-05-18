@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.yomu.shared.config;
 
 import id.ac.ui.cs.advprog.yomu.shared.security.JwtAuthenticationFilter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +24,8 @@ public class SharedSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @ConditionalOnMissingBean(SecurityFilterChain.class)
+    public SecurityFilterChain sharedSecurityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
