@@ -8,5 +8,6 @@ public record QuizCompletedEvent(
     UUID quizId,
     String quizSlug,
     int score,
+    int totalQuestions,
     Instant occurredAt
 ) {}
