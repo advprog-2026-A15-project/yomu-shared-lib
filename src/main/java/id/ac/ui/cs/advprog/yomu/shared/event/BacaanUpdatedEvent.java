@@ -6,6 +6,6 @@ import java.util.UUID;
 public record BacaanUpdatedEvent(
     UUID bacaanId,
     String title,
-    String action,
+    String action, // "CREATED", "UPDATED", "DELETED"
     Instant occurredAt
 ) {}
