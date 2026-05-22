@@ -108,6 +108,14 @@ tasks.jacocoTestReport {
         csv.required.set(false)
         html.required.set(true)
     }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude("id/ac/ui/cs/advprog/yomu/shared/grpc/**")
+                exclude("**/event/**")
+            }
+        })
+    )
 }
 
 sonar {
