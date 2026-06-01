@@ -71,4 +71,16 @@ class InternalServiceClientTest {
         assertNotNull(client);
         verify(restClientBuilder, never()).defaultHeader(anyString(), anyString());
     }
+
+    @Test
+    void testGetClientWithEmptyBearerToken() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization", "Bearer ");
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+        RestClient client = internalServiceClient.getClient("http://localhost:8080");
+
+        assertNotNull(client);
+        verify(restClientBuilder, never()).defaultHeader(anyString(), anyString());
+    }
 }

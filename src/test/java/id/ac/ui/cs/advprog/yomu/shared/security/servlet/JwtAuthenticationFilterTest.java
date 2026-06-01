@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -91,6 +92,83 @@ class JwtAuthenticationFilterTest {
         request.addHeader("Authorization", "Bearer bad-token");
 
         when(jwtService.isAccessTokenValid("bad-token")).thenThrow(new RuntimeException("Error parsing token"));
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    void testFilterWithPartialGatewayHeaders() throws Exception {
+        request.addHeader("X-User-Id", "user123");
+        // headerUsername and headerRole absent → condition false → falls to JWT path → no JWT → no auth
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    void testFilterWithNonBearerAuthHeader() throws Exception {
+        request.addHeader("Authorization", "Basic dXNlcjpwYXNz");
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    void testFilterWithValidJwtButAlreadyAuthenticated() throws Exception {
+        Authentication existingAuth = mock(Authentication.class);
+        SecurityContextHolder.getContext().setAuthentication(existingAuth);
+        request.addHeader("Authorization", "Bearer valid-token");
+        when(jwtService.isAccessTokenValid("valid-token")).thenReturn(true);
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+        verify(jwtService, never()).extractUsername(anyString());
+        assertNotNull(SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    void testFilterWithValidJwtButNullExtractedUsername() throws Exception {
+        request.addHeader("Authorization", "Bearer valid-token");
+        when(jwtService.isAccessTokenValid("valid-token")).thenReturn(true);
+        when(jwtService.extractUsername("valid-token")).thenReturn(null);
+        when(jwtService.extractRole("valid-token")).thenReturn("USER");
+        when(jwtService.extractUserId("valid-token")).thenReturn("user123");
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    void testFilterWithValidJwtButNullRole() throws Exception {
+        request.addHeader("Authorization", "Bearer valid-token");
+        when(jwtService.isAccessTokenValid("valid-token")).thenReturn(true);
+        when(jwtService.extractUsername("valid-token")).thenReturn("testuser");
+        when(jwtService.extractRole("valid-token")).thenReturn(null);
+        when(jwtService.extractUserId("valid-token")).thenReturn("user123");
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    void testFilterWithValidJwtButNullUserId() throws Exception {
+        request.addHeader("Authorization", "Bearer valid-token");
+        when(jwtService.isAccessTokenValid("valid-token")).thenReturn(true);
+        when(jwtService.extractUsername("valid-token")).thenReturn("testuser");
+        when(jwtService.extractRole("valid-token")).thenReturn("USER");
+        when(jwtService.extractUserId("valid-token")).thenReturn(null);
 
         filter.doFilterInternal(request, response, filterChain);
 
