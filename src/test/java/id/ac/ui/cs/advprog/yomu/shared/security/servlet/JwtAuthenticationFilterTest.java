@@ -134,41 +134,18 @@ class JwtAuthenticationFilterTest {
         assertNotNull(SecurityContextHolder.getContext().getAuthentication());
     }
 
-    @Test
-    void testFilterWithValidJwtButNullExtractedUsername() throws Exception {
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource(value = {
+            "null, USER, user123",
+            "testuser, null, user123",
+            "testuser, USER, null"
+    }, nullValues = "null")
+    void testFilterWithValidJwtButMissingClaims(String username, String role, String userId) throws Exception {
         request.addHeader("Authorization", "Bearer valid-token");
         when(jwtService.isAccessTokenValid("valid-token")).thenReturn(true);
-        when(jwtService.extractUsername("valid-token")).thenReturn(null);
-        when(jwtService.extractRole("valid-token")).thenReturn("USER");
-        when(jwtService.extractUserId("valid-token")).thenReturn("user123");
-
-        filter.doFilterInternal(request, response, filterChain);
-
-        verify(filterChain).doFilter(request, response);
-        assertNull(SecurityContextHolder.getContext().getAuthentication());
-    }
-
-    @Test
-    void testFilterWithValidJwtButNullRole() throws Exception {
-        request.addHeader("Authorization", "Bearer valid-token");
-        when(jwtService.isAccessTokenValid("valid-token")).thenReturn(true);
-        when(jwtService.extractUsername("valid-token")).thenReturn("testuser");
-        when(jwtService.extractRole("valid-token")).thenReturn(null);
-        when(jwtService.extractUserId("valid-token")).thenReturn("user123");
-
-        filter.doFilterInternal(request, response, filterChain);
-
-        verify(filterChain).doFilter(request, response);
-        assertNull(SecurityContextHolder.getContext().getAuthentication());
-    }
-
-    @Test
-    void testFilterWithValidJwtButNullUserId() throws Exception {
-        request.addHeader("Authorization", "Bearer valid-token");
-        when(jwtService.isAccessTokenValid("valid-token")).thenReturn(true);
-        when(jwtService.extractUsername("valid-token")).thenReturn("testuser");
-        when(jwtService.extractRole("valid-token")).thenReturn("USER");
-        when(jwtService.extractUserId("valid-token")).thenReturn(null);
+        when(jwtService.extractUsername("valid-token")).thenReturn(username);
+        when(jwtService.extractRole("valid-token")).thenReturn(role);
+        when(jwtService.extractUserId("valid-token")).thenReturn(userId);
 
         filter.doFilterInternal(request, response, filterChain);
 

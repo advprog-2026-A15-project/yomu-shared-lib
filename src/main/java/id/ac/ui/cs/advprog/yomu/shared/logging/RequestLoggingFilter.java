@@ -51,7 +51,14 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             long duration = System.currentTimeMillis() - startTime;
             int status = response.getStatus();
             
-            String statusColor = status >= 500 ? RED : (status >= 400 ? YELLOW : GREEN);
+            String statusColor;
+            if (status >= 500) {
+                statusColor = RED;
+            } else if (status >= 400) {
+                statusColor = YELLOW;
+            } else {
+                statusColor = GREEN;
+            }
             String methodColor = getMethodColor(method);
 
             log.info("{} {}[{}] {}{}{} {}{}{} {}{}{}ms{} - {}{}{}",

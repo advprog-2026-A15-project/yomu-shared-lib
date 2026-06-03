@@ -25,6 +25,10 @@ public class JwtService {
     @Value("${yomu.jwt.refresh-expiration:604800000}")
     private long refreshExpiration;
 
+    private static final String TYPE_CLAIM = "type";
+    private static final String ACCESS_TOKEN = "access";
+    private static final String REFRESH_TOKEN = "refresh";
+
     public boolean isTokenValid(String token) {
         try {
             return !isTokenExpired(token);
@@ -46,7 +50,7 @@ public class JwtService {
     }
 
     public String extractTokenType(String token) {
-        return extractClaim(token, claims -> claims.get("type", String.class));
+        return extractClaim(token, claims -> claims.get(TYPE_CLAIM, String.class));
     }
 
     public Instant extractExpirationInstant(String token) {
@@ -54,11 +58,11 @@ public class JwtService {
     }
 
     public boolean isAccessTokenValid(String token) {
-        return isTokenValid(token) && "access".equals(extractTokenType(token));
+        return isTokenValid(token) && ACCESS_TOKEN.equals(extractTokenType(token));
     }
 
     public boolean isRefreshTokenValid(String token) {
-        return isTokenValid(token) && "refresh".equals(extractTokenType(token));
+        return isTokenValid(token) && REFRESH_TOKEN.equals(extractTokenType(token));
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -68,19 +72,19 @@ public class JwtService {
 
     public String generateToken(String username, Map<String, Object> extraClaims) {
         Map<String, Object> claims = new HashMap<>(extraClaims);
-        claims.putIfAbsent("type", "access");
+        claims.putIfAbsent(TYPE_CLAIM, ACCESS_TOKEN);
         return generateToken(username, claims, jwtExpiration);
     }
 
     public String generateAccessToken(String username, Map<String, Object> extraClaims) {
         Map<String, Object> claims = new HashMap<>(extraClaims);
-        claims.put("type", "access");
+        claims.put(TYPE_CLAIM, ACCESS_TOKEN);
         return generateToken(username, claims, jwtExpiration);
     }
 
     public String generateRefreshToken(String username, Map<String, Object> extraClaims) {
         Map<String, Object> claims = new HashMap<>(extraClaims);
-        claims.put("type", "refresh");
+        claims.put(TYPE_CLAIM, REFRESH_TOKEN);
         return generateToken(username, claims, refreshExpiration);
     }
 

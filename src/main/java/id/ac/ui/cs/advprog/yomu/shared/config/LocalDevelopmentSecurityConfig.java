@@ -14,11 +14,11 @@ import org.springframework.security.web.SecurityFilterChain;
 public class LocalDevelopmentSecurityConfig {
 
     @Bean
-    public SecurityFilterChain localDevelopmentSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain localDevelopmentSecurityFilterChain(HttpSecurity http) {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
+            .headers(headers -> headers.frameOptions(org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig::disable));
             
         return http.build();
     }

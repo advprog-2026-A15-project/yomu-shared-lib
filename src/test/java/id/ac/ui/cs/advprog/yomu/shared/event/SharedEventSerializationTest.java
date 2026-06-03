@@ -30,8 +30,7 @@ class SharedEventSerializationTest {
         var restored = MAPPER.readValue(json, QuizCompletedEvent.class);
 
         assertThat(restored).isEqualTo(original);
-        assertThat(json).contains("totalQuestions");
-        assertThat(json).contains("quizSlug");
+        assertThat(json).contains("totalQuestions", "quizSlug");
     }
 
     @Test
@@ -90,8 +89,7 @@ class SharedEventSerializationTest {
         var restored = MAPPER.readValue(json, ClanPromotedEvent.class);
 
         assertThat(restored).isEqualTo(original);
-        assertThat(json).contains("previousTier");
-        assertThat(json).contains("newTier");
+        assertThat(json).contains("previousTier", "newTier");
     }
 
     @Test

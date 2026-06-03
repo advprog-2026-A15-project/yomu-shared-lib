@@ -62,33 +62,16 @@ class RequestLoggingFilterTest {
         verify(filterChain).doFilter(request, response);
     }
 
-    @Test
-    void testFailedPostRequestIsLogged() throws Exception {
-        request.setMethod("POST");
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({
+            "POST, 500",
+            "PUT, 404",
+            "DELETE, 204"
+    })
+    void testRequestIsLogged(String method, int status) throws Exception {
+        request.setMethod(method);
         request.setRequestURI("/api/resource");
-        response.setStatus(500);
-
-        filter.doFilterInternal(request, response, filterChain);
-
-        verify(filterChain).doFilter(request, response);
-    }
-
-    @Test
-    void testClientErrorPutRequestIsLogged() throws Exception {
-        request.setMethod("PUT");
-        request.setRequestURI("/api/resource");
-        response.setStatus(404);
-
-        filter.doFilterInternal(request, response, filterChain);
-
-        verify(filterChain).doFilter(request, response);
-    }
-
-    @Test
-    void testDeleteRequestIsLogged() throws Exception {
-        request.setMethod("DELETE");
-        request.setRequestURI("/api/resource");
-        response.setStatus(204);
+        response.setStatus(status);
 
         filter.doFilterInternal(request, response, filterChain);
 

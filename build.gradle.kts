@@ -24,33 +24,39 @@ repositories {
 
 val grpcVersion = "1.63.0"
 val protobufVersion = "3.25.3"
+val jjwtVersion = "0.12.6"
+val grpcSpringBootVersion = "3.1.0.RELEASE"
+val javaxAnnotationVersion = "1.3.2"
+val jakartaAnnotationVersion = "3.0.0"
 
 dependencies {
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-amqp")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.micrometer:micrometer-registry-prometheus")
-
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-
-    implementation("io.jsonwebtoken:jjwt-api:0.12.6")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
-
-    // gRPC & Protobuf
+    implementation("io.jsonwebtoken:jjwt-api:${jjwtVersion}")
     implementation("io.grpc:grpc-netty-shaded:$grpcVersion")
     implementation("io.grpc:grpc-protobuf:$grpcVersion")
     implementation("io.grpc:grpc-stub:$grpcVersion")
-    implementation("net.devh:grpc-server-spring-boot-starter:3.1.0.RELEASE")
-    implementation("net.devh:grpc-client-spring-boot-starter:3.1.0.RELEASE")
-    implementation("javax.annotation:javax.annotation-api:1.3.2")
-    compileOnly("jakarta.annotation:jakarta.annotation-api:3.0.0")
+    implementation("net.devh:grpc-server-spring-boot-starter:${grpcSpringBootVersion}")
+    implementation("net.devh:grpc-client-spring-boot-starter:${grpcSpringBootVersion}")
+    implementation("javax.annotation:javax.annotation-api:${javaxAnnotationVersion}")
+
+    compileOnly("org.projectlombok:lombok")
+    compileOnly("jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}")
+    annotationProcessor("org.projectlombok:lombok")
+
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:${jjwtVersion}")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:${jjwtVersion}")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+
+dependencyLocking {
+    lockAllConfigurations()
 }
 
 protobuf {

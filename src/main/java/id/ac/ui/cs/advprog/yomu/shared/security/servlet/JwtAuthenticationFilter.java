@@ -31,7 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String headerRole = request.getHeader("X-User-Role");
 
         if (headerUserId != null && headerUsername != null && headerRole != null) {
-            setAuthentication(headerUserId, headerUsername, headerRole, request);
+            setAuthentication(headerUserId, headerRole, request);
             filterChain.doFilter(request, response);
             return;
         }
@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String userId = jwtService.extractUserId(jwt);
 
                 if (username != null && role != null && userId != null) {
-                    setAuthentication(userId, username, role, request);
+                    setAuthentication(userId, role, request);
                 }
             }
         } catch (Exception e) {
@@ -62,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void setAuthentication(String userId, String username, String role, HttpServletRequest request) {
+    private void setAuthentication(String userId, String role, HttpServletRequest request) {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                 userId, // principal is userId (UUID string)
                 userId, // credentials is userId (changed from username to fix controller expectations)
